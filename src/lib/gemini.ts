@@ -1,7 +1,7 @@
 import { fetch } from "@tauri-apps/plugin-http";
 import { getSecretsByProvider } from "./secrets";
 import { logAudit, AuditActions } from "./audit";
-import type { DailyUsage, ProjectUsage, ProjectInfo } from "./openai";
+import type { DailyUsage, ProjectUsage } from "./openai";
 
 // Google AI Studio / Gemini API
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com";

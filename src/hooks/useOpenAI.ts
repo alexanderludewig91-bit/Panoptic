@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getUsageSummary, type UsageSummary, type ProjectUsage, type DailyUsage } from "@/lib/openai";
-import { getAnthropicUsageSummary } from "@/lib/anthropic";
-import { getGeminiUsageSummary } from "@/lib/gemini";
+import { getAnthropicUsageSummary, type AnthropicUsageSummary } from "@/lib/anthropic";
+import { getGeminiUsageSummary, type GeminiUsageSummary } from "@/lib/gemini";
 
 export function useOpenAIUsage() {
   return useQuery({
@@ -41,8 +41,8 @@ export interface CombinedUsageSummary {
   projects: ProjectUsage[];
   providers: {
     openai: UsageSummary | null;
-    anthropic: UsageSummary | null;
-    gemini: UsageSummary | null;
+    anthropic: AnthropicUsageSummary | null;
+    gemini: GeminiUsageSummary | null;
   };
 }
 

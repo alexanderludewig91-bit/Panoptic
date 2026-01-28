@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Panoptic Logo](logo/panoptic_icon_square.png)
+![Panoptic Logo](logo/panoptic_icon_white.png)
 
 **DevOps Admin Dashboard für LLM-Kostenüberwachung**
 
