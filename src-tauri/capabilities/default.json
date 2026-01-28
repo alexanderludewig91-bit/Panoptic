@@ -34,6 +34,9 @@
     "fs:allow-write-text-file",
     "fs:allow-exists",
     "fs:allow-mkdir",
+    "fs:allow-copy-file",
+    "fs:allow-remove",
+    "fs:allow-rename",
     "fs:allow-app-read",
     "fs:allow-app-write",
     "fs:allow-app-read-recursive",
@@ -50,6 +53,26 @@
     "fs:allow-applocaldata-write",
     "fs:allow-applocaldata-read-recursive",
     "fs:allow-applocaldata-write-recursive",
+    "fs:allow-home-read",
+    "fs:allow-home-write",
+    "fs:allow-home-read-recursive",
+    "fs:allow-home-write-recursive",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        "$APPDATA/**",
+        "$APPLOCALDATA/**",
+        "$APPCONFIG/**",
+        "$HOME/**",
+        "$HOME/Library/CloudStorage/**",
+        "$HOME/OneDrive/**",
+        "$HOME/Dropbox/**",
+        "$HOME/iCloud/**",
+        "/Users/*/Library/CloudStorage/**",
+        "/Users/*/OneDrive/**",
+        "/Users/*/Dropbox/**"
+      ]
+    },
     {
       "identifier": "http:default",
       "allow": [

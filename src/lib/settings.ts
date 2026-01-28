@@ -1,5 +1,8 @@
-import { getDatabase, setDataPath as setDbPath, getDataPath } from "./database";
+import { getDatabase, setDataPath as setDbPath, getDataPath, migrateDatabase } from "./database";
 import { logAudit, AuditActions } from "./audit";
+
+// Re-export database utilities for use in components
+export { databaseExistsAt, getDatabaseInfo, getDatabaseInfoAt, switchToExistingDatabase } from "./database";
 
 export interface AppSettings {
   dataPath: string;
@@ -91,16 +94,55 @@ export async function getAllSettings(): Promise<AppSettings> {
   return settings;
 }
 
-export async function updateDataPath(newPath: string): Promise<void> {
+export interface DataPathUpdateResult {
+  success: boolean;
+  error?: string;
+  migrated: boolean;
+}
+
+export async function updateDataPath(
+  newPath: string, 
+  options: { overwrite?: boolean } = {}
+): Promise<DataPathUpdateResult> {
   const oldPath = await getDataPath();
+  
+  // If same path, nothing to do
+  if (oldPath === newPath) {
+    return { success: true, migrated: false };
+  }
 
-  await setDbPath(newPath);
-  await setSetting("dataPath", newPath);
+  // Attempt migration
+  const migrationResult = await migrateDatabase(newPath, options);
+  
+  if (!migrationResult.success) {
+    return migrationResult;
+  }
 
-  await logAudit(AuditActions.DATA_PATH_CHANGED, "settings", "dataPath", {
-    oldPath,
-    newPath,
-  });
+  // Update the path in settings (this will use the new database)
+  try {
+    await setDbPath(newPath);
+    
+    // Re-initialize and save the setting
+    const db = await getDatabase();
+    const stringValue = newPath;
+    await db.execute(
+      `INSERT INTO settings (key, value, updated_at) 
+       VALUES (?, ?, unixepoch())
+       ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = unixepoch()`,
+      ["dataPath", stringValue, stringValue]
+    );
+
+    await logAudit(AuditActions.DATA_PATH_CHANGED, "settings", "dataPath", {
+      oldPath,
+      newPath,
+      migrated: migrationResult.migrated,
+    });
+    
+    return { success: true, migrated: migrationResult.migrated };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { success: false, error: errorMessage, migrated: false };
+  }
 }
 
 export async function isSetupCompleted(): Promise<boolean> {

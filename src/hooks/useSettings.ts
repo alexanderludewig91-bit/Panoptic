@@ -7,7 +7,12 @@ import {
   completeSetup,
   verifyPassword,
   setMasterPassword,
+  databaseExistsAt,
+  getDatabaseInfo,
+  getDatabaseInfoAt,
+  switchToExistingDatabase,
   type AppSettings,
+  type DataPathUpdateResult,
 } from "@/lib/settings";
 
 export function useSettings() {
@@ -41,9 +46,46 @@ export function useUpdateDataPath() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: updateDataPath,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["settings"] });
+    mutationFn: async (params: { path: string; overwrite?: boolean }): Promise<DataPathUpdateResult> => {
+      return await updateDataPath(params.path, { overwrite: params.overwrite });
+    },
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: ["settings"] });
+      }
+    },
+  });
+}
+
+export function useCheckDatabaseExists() {
+  return useMutation({
+    mutationFn: databaseExistsAt,
+  });
+}
+
+export function useDatabaseInfo() {
+  return useQuery({
+    queryKey: ["database", "info"],
+    queryFn: getDatabaseInfo,
+  });
+}
+
+export function useGetDatabaseInfoAt() {
+  return useMutation({
+    mutationFn: getDatabaseInfoAt,
+  });
+}
+
+export function useSwitchToExistingDatabase() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: switchToExistingDatabase,
+    onSuccess: (result) => {
+      if (result.success) {
+        // Invalidate all queries to refresh with new database
+        queryClient.invalidateQueries();
+      }
     },
   });
 }
